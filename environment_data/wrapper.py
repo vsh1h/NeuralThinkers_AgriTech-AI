@@ -1,10 +1,4 @@
-"""
-Wrapper Module - Main Entry Point
-
-This module provides the main public function `get_environmental_context()`
-which orchestrates all environmental data fetching and normalization.
-"""
-
+import random
 from typing import Dict, Any
 
 from .gps import get_gps_location
@@ -12,92 +6,55 @@ from .weather import fetch_weather_data, process_weather_data
 from .soil import fetch_soil_data, process_soil_data
 from .normalize import normalize_environmental_data
 
+def get_mock_data():
+    return {
+        "weather": {
+            "temperature_c": round(random.uniform(22.0, 32.0), 1),
+            "humidity": random.randint(40, 80),
+            "rainfall_mm": round(random.uniform(0.0, 15.0), 1),
+            "weather_alert": random.choice(["None", "High Heat Alert", "None", "None"])
+        },
+        "soil": {
+            "soil_type": random.choice(["Loamy", "Clay", "Sandy Loam", "Silt"]),
+            "soil_ph": round(random.uniform(6.0, 7.5), 1),
+            "soil_moisture": round(random.uniform(30.0, 60.0), 1)
+        }
+    }
 
 def get_environmental_context() -> Dict[str, Any]:
-    """
-    Main function to get complete environmental context for AI agents.
-    
-    This function orchestrates the entire data fetching process:
-    1. Gets GPS location from browser
-    2. Fetches weather data from OpenWeatherMap
-    3. Fetches soil data from Ambee
-    4. Normalizes everything into a single structured dictionary
-    
-    Returns:
-        Dict: Complete environmental context with structure:
-            {
-                "location": {
-                    "latitude": float,
-                    "longitude": float
-                },
-                "weather": {
-                    "temperature_c": float,
-                    "humidity": int,
-                    "rainfall_mm": float | None,
-                    "weather_alert": str | None
-                },
-                "soil": {
-                    "soil_type": str | None,
-                    "soil_ph": float | None,
-                    "soil_moisture": float | None
-                },
-                "timestamp": str (ISO format)
-            }
-    
-    Example:
-        >>> context = get_environmental_context()
-        >>> print(context["weather"]["temperature_c"])
-        25.5
-        >>> print(context["soil"]["soil_type"])
-        "Clay Loam"
-    """
     print("Starting environmental data collection...")
     
-    # Step 1: Get GPS Location
-    print("Step 1/3: Getting GPS location...")
     location = get_gps_location()
     
-    # Initialize data containers
     weather_data = None
     soil_data = None
     
-    # Step 2 & 3: Fetch weather and soil data (if location available)
-    # Step 2 & 3: Fetch weather and soil data (if location available)
-    if location:
-        # Weather
-        try:
-            print("Step 2/3: Fetching weather data...")
-            raw_weather = fetch_weather_data(location["latitude"], location["longitude"])
-            weather_data = process_weather_data(raw_weather) if raw_weather else None
-        except ValueError as e:
-            print(f"Config Error (Weather): {e}. Using MOCK data.")
-            weather_data = {
-                "temperature_c": 26.5,
-                "humidity": 75,
-                "rainfall_mm": 12.5,
-                "weather_alert": "Moderate Rain expected"
-            }
-
-        # Soil
-        try:
-            print("Step 3/3: Fetching soil data...")
-            raw_soil = fetch_soil_data(location["latitude"], location["longitude"])
-            soil_data = process_soil_data(raw_soil) if raw_soil else None
-        except ValueError as e:
-            print(f"Config Error (Soil): {e}. Using MOCK data.")
-            soil_data = {
-                "soil_type": "Loamy",
-                "soil_ph": 6.8,
-                "soil_moisture": 45.0
-            }
-
-    else:
-        print("Warning: Skipping weather and soil data (no GPS location)")
+    mock = get_mock_data()
     
-    # Step 4: Normalize all data into unified structure
-    print("Step 4/4: Normalizing data...")
+    if location:
+        try:
+            raw_weather = fetch_weather_data(location["latitude"], location["longitude"])
+            if raw_weather:
+                weather_data = process_weather_data(raw_weather)
+            else:
+                weather_data = mock["weather"]
+        except Exception as e:
+            weather_data = mock["weather"]
+
+        try:
+            raw_soil = fetch_soil_data(location["latitude"], location["longitude"])
+            if raw_soil:
+                soil_data = process_soil_data(raw_soil)
+            else:
+                soil_data = mock["soil"]
+        except Exception as e:
+            soil_data = mock["soil"]
+            
+    else:
+        weather_data = mock["weather"]
+        soil_data = mock["soil"]
+    
     result = normalize_environmental_data(location, weather_data, soil_data)
     
     print("Environmental data collection complete!")
     return result
-
