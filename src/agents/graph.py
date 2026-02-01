@@ -144,3 +144,33 @@ def build_graph():
     return graph.compile(
         checkpointer=get_memory()
     )
+
+def route_after_weather(state: AgentState) -> str:
+    farmer_input = state["farmer_input"]
+
+    if farmer_input.soil_type == "unknown":
+        return "generate_advice"
+
+    return "soil_analysis"              
+    graph.add_edge("weather_analysis", route_after_weather)
+    graph.add_edge("soil_analysis", "generate_advice")
+def build_graph():
+    graph = StateGraph(AgentState)
+
+    graph.add_node("validate_input", validate_input_node)
+    graph.add_node("extract_keywords", keyword_extraction_node)
+    graph.add_node("weather_analysis", weather_node)
+    graph.add_node("soil_analysis", soil_node)
+    graph.add_node("generate_advice", advice_node)
+
+    graph.set_entry_point("validate_input")
+
+    graph.add_edge("validate_input", "extract_keywords")
+    graph.add_edge("extract_keywords", "weather_analysis")
+    graph.add_edge("weather_analysis", route_after_weather)
+    graph.add_edge("soil_analysis", "generate_advice")
+    graph.add_edge("generate_advice", END)
+
+    return graph.compile(
+        checkpointer=get_memory()
+    ) 
