@@ -1,29 +1,29 @@
-# 📋 Data Handshake Document - Member 4 (Prompt & LLM Specialist)
+#  Data Handshake Document - Member 4 (Prompt & LLM Specialist)
 
-**Status:** ✅ All connections defined and ready for integration  
+**Status:**  All connections defined and ready for integration  
 **Date:** February 1, 2026  
 **Ownership:** Member 4 (Prompt Engineering & LLM Chains)
 
 ---
 
-## 🤝 Connection Map: Member 4 ↔ Other Teams
+##  Connection Map: Member 4  Other Teams
 
-### **Connection 1️⃣: Member 4 ↔ Member 1 (UI/Frontend)**
+### **Connection 1: Member 4  Member 1 (UI/Frontend)**
 
 **Purpose:** Member 1 displays validation errors to the farmer.
 
 **Data Flow:**
 ```
 UI (Member 1)
-    ↓
+    
     Captures FarmerInput (crop, soil_type, location, reported_action)
-    ↓
+    
 Member 4's Validation Chain
-    ↓
+    
     Returns ValidationResult (is_valid, error_message, warnings)
-    ↓
+    
 UI (Member 1)
-    ↓
+    
     If is_valid=False, show error_message as popup
 ```
 
@@ -45,20 +45,20 @@ UI (Member 1)
 
 ---
 
-### **Connection 2️⃣: Member 4 ↔ Member 2 (Workflow/Graph)**
+### **Connection 2: Member 4  Member 2 (Workflow/Graph)**
 
 **Purpose:** Member 2 orchestrates the workflow by calling Member 4's chains.
 
 **Data Flow:**
 ```
 Member 2's LangGraph (graph.py)
-    ↓
-    [Node 1] Call extract_extraction_chain() → ExtractionModel
-    [Node 2] Call create_validation_chain() → ValidationResult  
-    [Node 3] Call create_advice_chain() → Advisory string
-    ↓
+    
+    [Node 1] Call extract_extraction_chain()  ExtractionModel
+    [Node 2] Call create_validation_chain()  ValidationResult  
+    [Node 3] Call create_advice_chain()  Advisory string
+    
     Route based on results (conditional edges)
-    ↓
+    
 Return final advice to User
 ```
 
@@ -91,21 +91,21 @@ result = extraction_chain.invoke({"query": farmer_query})
 
 ---
 
-### **Connection 3️⃣: Member 4 ↔ Member 3 (API/Tools Integration)**
+### **Connection 3: Member 4  Member 3 (API/Tools Integration)**
 
 **Purpose:** Member 3 fetches real-time data; Member 4 uses it in prompts.
 
 **Data Flow:**
 ```
 Member 3's Tools (soil_service.py, weather_api.py)
-    ↓
-    Fetches weather data → WeatherData model
-    Fetches soil data → SoilData model
-    ↓
+    
+    Fetches weather data  WeatherData model
+    Fetches soil data  SoilData model
+    
 Member 4's Prompts
-    ↓
+    
     Injects {soil_ph}, {temperature_c}, {rainfall_mm}, etc. into prompt
-    ↓
+    
 Gemini AI grounds advice in real environmental facts
 ```
 
@@ -114,9 +114,9 @@ Gemini AI grounds advice in real environmental facts
 **WeatherData (from Member 3):**
 | Field | Type | Constraint | Used In Prompt |
 |-------|------|-----------|-----------------|
-| `temperature_c` | `float` | Any | `{temperature_c}°C` |
+| `temperature_c` | `float` | Any | `{temperature_c}C` |
 | `humidity` | `int` | 0-100 | Not yet used |
-| `rainfall_mm` | `float (optional)` | ≥0 | `{rainfall_mm}mm` |
+| `rainfall_mm` | `float (optional)` | 0 | `{rainfall_mm}mm` |
 | `weather_alert` | `str (optional)` | Any | `{weather_alert}` |
 
 **SoilData (from Member 3):**
@@ -124,16 +124,16 @@ Gemini AI grounds advice in real environmental facts
 |-------|------|-----------|-----------------|
 | `soil_ph` | `float (optional)` | 0-14 | `{soil_ph}` |
 | `soil_moisture` | `float (optional)` | 0-100 | `{soil_moisture}%` |
-| `nitrogen` | `float (optional)` | ≥0 | Available for future prompts |
-| `phosphorus` | `float (optional)` | ≥0 | Available for future prompts |
-| `potassium` | `float (optional)` | ≥0 | Available for future prompts |
+| `nitrogen` | `float (optional)` | 0 | Available for future prompts |
+| `phosphorus` | `float (optional)` | 0 | Available for future prompts |
+| `potassium` | `float (optional)` | 0 | Available for future prompts |
 
 **Prompts Using These Variables:**
 
 1. **VALIDATION_SYSTEM_PROMPT** (line ~180 in prompts.py):
    ```
    - Soil Data: pH {soil_ph}, Moisture {soil_moisture}%
-   - Weather: {temperature_c}°C, Alert: {weather_alert}
+   - Weather: {temperature_c}C, Alert: {weather_alert}
    ```
    Variables needed: `soil_ph`, `soil_moisture`, `temperature_c`, `weather_alert`
 
@@ -153,22 +153,22 @@ Gemini AI grounds advice in real environmental facts
 
 ---
 
-### **Connection 4️⃣: Member 4 ↔ Member 5 (Database/Memory)**
+### **Connection 4: Member 4  Member 5 (Database/Memory)**
 
 **Purpose:** Member 5 retrieves history; Member 4 injects it into prompts so AI "remembers."
 
 **Data Flow:**
 ```
 Member 5's Memory Agent (database/memory.py)
-    ↓
+    
     Query: Get history for this farmer
-    ↓
+    
     Returns: String of past interactions
-    ↓
+    
 Member 4's Prompt
-    ↓
+    
     Injects {history} into ADVICE_GENERATION_SYSTEM_PROMPT
-    ↓
+    
     Gemini AI considers past advice before responding
 ```
 
@@ -211,18 +211,18 @@ result = chain.invoke({
 
 ---
 
-## 📊 Summary Table: All Data Handshakes
+##  Summary Table: All Data Handshakes
 
 | From/To | Shared Asset | Type | Direction | Status |
 |---------|--------------|------|-----------|--------|
-| **Member 1** | `FarmerInput`, `ValidationResult` | Pydantic Models | ↔ | ✅ Ready |
-| **Member 2** | `create_X_chain()` functions | Callables | ← | ✅ Ready |
-| **Member 3** | `WeatherData`, `SoilData` | Pydantic Models | → | ✅ Defined, awaiting data |
-| **Member 5** | `{history}` string | Template Variable | ← | ✅ Ready |
+| **Member 1** | `FarmerInput`, `ValidationResult` | Pydantic Models |  |  Ready |
+| **Member 2** | `create_X_chain()` functions | Callables |  |  Ready |
+| **Member 3** | `WeatherData`, `SoilData` | Pydantic Models |  |  Defined, awaiting data |
+| **Member 5** | `{history}` string | Template Variable |  |  Ready |
 
 ---
 
-## 🔗 Integration Checklist
+##  Integration Checklist
 
 ### For Member 1 (UI):
 - [ ] Import `FarmerInput` and `ValidationResult` from `src/agents/state.py`
@@ -251,9 +251,9 @@ result = chain.invoke({
 
 ---
 
-## 🚀 Ready for Integration
+##  Ready for Integration
 
-**All Data Contracts Defined ✅**
+**All Data Contracts Defined **
 
 Member 4's code is ready to be integrated with all other members. All variable names, types, and prompt placeholders are locked in and documented.
 

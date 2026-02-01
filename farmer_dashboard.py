@@ -108,7 +108,7 @@ def show_farmer_dashboard():
             st.session_state.page = "login"
             st.rerun()
             
-        if st.button("⚙️ Field Setup"):
+        if st.button("Field Setup"):
             st.session_state.page = "welcome"
             st.rerun()
 
@@ -127,7 +127,7 @@ def show_farmer_dashboard():
         
         col_back, col_space = st.columns([1, 4])
         with col_back:
-            if st.button("⬅️ Change Field Details"):
+            if st.button("Change Field Details"):
                 st.session_state.page = "welcome"
                 st.rerun()
 
@@ -249,7 +249,7 @@ def show_farmer_dashboard():
             )
             st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("### ☁️ Environmental Status")
+        st.markdown("### Environmental Status")
         current_alert = st.session_state.get('weather_alert')
         if current_alert and current_alert != "None":
             st.warning(f"**Alert:** {current_alert}. Adjust your farm management accordingly.")
@@ -258,10 +258,10 @@ def show_farmer_dashboard():
 
 
     elif page == "AI Advisor":
-        st.markdown(f"<h1 style='margin-bottom:0;'>🤖 AI Advisor</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='margin-bottom:0;'>AI Advisor</h1>", unsafe_allow_html=True)
         st.markdown(f"<p style='color:#94a3b8;'>Expert guidance for your {active_crop} in {st.session_state.get('soil_type', 'your')} soil.</p>", unsafe_allow_html=True)
         
-        if st.button("⬅️ Change Field Details"):
+        if st.button("Change Field Details"):
             st.session_state.page = "welcome"
             st.rerun()
         
@@ -274,7 +274,7 @@ def show_farmer_dashboard():
             })
             
         with st.sidebar:
-            if st.button("🗑️ Clear Chat History"):
+            if st.button("Clear Chat History"):
                 del st.session_state.messages
                 st.rerun()
 
@@ -289,14 +289,24 @@ def show_farmer_dashboard():
 
             with st.chat_message("assistant"):
                 with st.spinner("Consulting AI Agronomist..."):
+                    env = st.session_state.get('env_data', {})
+                    weather = env.get('weather', {})
+                    soil = env.get('soil', {})
+                    
                     context = {
                         "crop_type": st.session_state.get('crop_type'),
                         "soil_type": st.session_state.get('soil_type'),
                         "ph_level": st.session_state.get('ph_level'),
-                        "weather_alert": st.session_state.get('weather_alert')
+                        "weather_alert": st.session_state.get('weather_alert'),
+                        "temperature_c": weather.get('temperature_c'),
+                        "humidity": weather.get('humidity'),
+                        "rainfall_mm": weather.get('rainfall_mm'),
+                        "soil_moisture": soil.get('soil_moisture'),
+                        "soil_ph": soil.get('soil_ph')
                     }
                     response = get_chat_response(st.session_state.messages, context)
                     st.markdown(response)
+
             
             st.session_state.messages.append({"role": "assistant", "content": response})
 

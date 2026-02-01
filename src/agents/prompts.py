@@ -26,7 +26,7 @@ def retry_on_rate_limit(max_retries=3, initial_wait=2):
                     except Exception as e:
                         if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
                             if i < max_retries - 1:
-                                print(f"⚠️ Rate limit hit. Retrying in {wait_time}s... (Attempt {i+1}/{max_retries})")
+                                print(f"Rate limit hit. Retrying in {wait_time}s... (Attempt {i+1}/{max_retries})")
                                 await asyncio.sleep(wait_time)
                                 wait_time *= 2
                             else:
@@ -45,7 +45,7 @@ def retry_on_rate_limit(max_retries=3, initial_wait=2):
                     except Exception as e:
                         if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
                             if i < max_retries - 1:
-                                print(f"⚠️ Rate limit hit. Retrying in {wait_time}s... (Attempt {i+1}/{max_retries})")
+                                print(f"Rate limit hit. Retrying in {wait_time}s... (Attempt {i+1}/{max_retries})")
                                 time.sleep(wait_time)
                                 wait_time *= 2
                             else:
@@ -136,7 +136,7 @@ VALIDATION_SYSTEM_PROMPT = """You are an agricultural data auditor.
 Your job is to ensure the farmer's input is logical compared to real-time data.
 
 Current Environment:
-- Temperature: {temp}°C
+- Temperature: {temp}C
 - Soil Moisture: {moisture}%
 - Rainfall (24h): {rain}mm
 - Soil pH: {ph}
@@ -179,8 +179,12 @@ You are a Senior Agronomist. Provide practical, low-cost, and science-backed sol
 
 === CONTEXTUAL DATA ===
 - Soil Data: pH {soil_ph}, Moisture {soil_moisture}%
-- Weather: {temperature_c}°C, Alert: {weather_alert}
+- Weather: {temperature_c}C, Alert: {weather_alert}
 - History (Memory Agent): {history}
+
+=== FARMER'S QUESTION ===
+{query}
+
 
 === TRUTH-CHECKING PROTOCOL ===
 If farmer claims conflict with environmental data, respond with GENTLE VERIFICATION.
@@ -207,7 +211,7 @@ ENVIRONMENTAL DATA:
 - Soil pH: {soil_ph}
 - Soil Moisture: {soil_moisture}%
 - Rainfall (24h): {rainfall_mm}mm
-- Temperature: {temperature_c}°C
+- Temperature: {temperature_c}C
 - Weather Alert: {weather_alert}
 
 FARMER'S CLAIM: {farmer_claim}
@@ -387,11 +391,23 @@ def generate_agricultural_advice(
         "history": history,
         "query": farmer_query
     })
-    # Handle different response formats from Gemini
+    # Handle different response formats from Gemini/OpenAI
     if isinstance(result, str):
         return result
     elif hasattr(result, 'content'):
-        return result.content
+        content = result.content
+        if isinstance(content, list):
+            # Join text blocks if it's a list (common in multimodal or newer LangChain versions)
+            text_blocks = []
+            for block in content:
+                if isinstance(block, dict) and 'text' in block:
+                    text_blocks.append(block['text'])
+                elif isinstance(block, str):
+                    text_blocks.append(block)
+                else:
+                    text_blocks.append(str(block))
+            return " ".join(text_blocks)
+        return str(content)
     elif isinstance(result, dict) and 'text' in result:
         return result['text']
     elif isinstance(result, list) and len(result) > 0:
@@ -399,6 +415,7 @@ def generate_agricultural_advice(
             return result[0]['text']
         return str(result[0])
     return str(result)
+
 
 
 @retry_on_rate_limit(max_retries=3)
@@ -459,7 +476,7 @@ def verify_farmer_claim(
     }
 
 
-# ========== INTEGRATION LAYER: Member 4 ↔ Member 3 ==========
+# Integration Layer
 
 def get_environmental_data_from_member3(latitude: float, longitude: float) -> dict:
     """
@@ -552,7 +569,7 @@ def generate_advice_with_environment(
         soil_ph=soil_data.soil_ph or 6.5,  # Default to neutral pH
         soil_moisture=soil_data.soil_moisture or 50,  # Default to moderate moisture
         rainfall_mm=weather_data.rainfall_mm or 0,  # Default to no rain
-        temperature_c=weather_data.temperature_c or 25,  # Default to 25°C
+        temperature_c=weather_data.temperature_c or 25,  # Default to 25C
         weather_alert=weather_data.weather_alert,
         history=history,
         model_name=model_name

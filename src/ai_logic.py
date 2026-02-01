@@ -1,6 +1,15 @@
 from typing import Dict, Any, List
 import os
 import random
+import json
+
+from src.agents.prompts import (
+    generate_agricultural_advice, 
+    extract_keywords_from_query_sync,
+    generate_advice_with_environment,
+    verify_farmer_claim
+)
+from src.agents.state import WeatherData, SoilData
 
 try:
     from langchain_openai import ChatOpenAI
@@ -64,7 +73,6 @@ def get_expert_analysis(weather_data: Dict[str, Any], soil_data: Dict[str, Any])
             )
             chain = json_prompt | llm
             result = chain.invoke({"weather_data": str(weather_data), "soil_data": str(soil_data)})
-            import json
             clean_content = result.content.strip().replace("```json", "").replace("```", "")
             return json.loads(clean_content)
         except Exception as e:
@@ -73,22 +81,35 @@ def get_expert_analysis(weather_data: Dict[str, Any], soil_data: Dict[str, Any])
     return get_simulated_analysis(weather_data, soil_data)
 
 def get_chat_response(messages: List[Dict[str, str]], context: Dict[str, Any]) -> str:
+    """
+    Get chat response using the advanced logic from src.agents.prompts.
+    """
     api_key = os.environ.get("OPENAI_API_KEY", "").strip().strip('"').strip("'")
+    gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    
     user_prompt = messages[-1]["content"] if messages else ""
     
-    if AI_AVAILABLE and api_key and "sk-" in api_key:
+    if (AI_AVAILABLE and api_key and "sk-" in api_key) or (gemini_key):
         try:
-            llm = ChatOpenAI(temperature=0.7, model_name="gpt-4o-mini", openai_api_key=api_key)
-            system_text = f"You are an AI Agronomist for {context.get('crop_type')} in {context.get('soil_type')} soil (pH {context.get('ph_level')})."
-            
-            langchain_messages = [SystemMessage(content=system_text)]
-            for msg in messages:
-                if msg["role"] == "user": langchain_messages.append(HumanMessage(content=msg["content"]))
-                elif msg["role"] == "assistant": langchain_messages.append(AIMessage(content=msg["content"]))
-                
-            response = llm.invoke(langchain_messages)
-            return response.content
+            # Extract historical context from messages
+            history = ""
+            if len(messages) > 1:
+                # Exclude the last message (current prompt)
+                history = "\n".join([f"{m['role']}: {m['content']}" for m in messages[:-1]])
+
+            # Call the agent logic for generating advice
+            advice = generate_agricultural_advice(
+                farmer_query=user_prompt,
+                soil_ph=context.get('ph_level', 7.0),
+                soil_moisture=context.get('soil_moisture', 50.0),
+                rainfall_mm=context.get('rainfall_mm', 0.0),
+                temperature_c=context.get('temperature_c', 25.0),
+                weather_alert=context.get('weather_alert', 'None'),
+                history=history
+            )
+            return advice
         except Exception as e:
-            print(f"Chat API failed, switching to Smart Simulator: {e}")
+            print(f"Agent logic failed, switching to Smart Simulator: {e}")
 
     return get_simulated_chat(user_prompt, context)
+

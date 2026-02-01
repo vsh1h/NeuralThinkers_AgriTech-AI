@@ -105,7 +105,7 @@
 #         "detected_state": state,
 #         "suggested_soil": data['soil'],
 #         "suggested_crops": suggested_crops,
-#         "weather_summary": f"{temp}°C, {'Raining' if is_raining else 'Clear'}"
+#         "weather_summary": f"{temp}C, {'Raining' if is_raining else 'Clear'}"
 #     }
 
 
@@ -299,5 +299,5 @@ def fetch_agri_context(lat, lon):
 
         # WEATHER
         "temperature": temp,
-        "weather_summary": f"{temp}°C, {'Raining' if is_raining else 'Clear'}",
+        "weather_summary": f"{temp}C, {'Raining' if is_raining else 'Clear'}",
     }

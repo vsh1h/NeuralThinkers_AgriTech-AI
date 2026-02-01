@@ -4,7 +4,7 @@
 
 Farming decisions are not static. They continuously change based on soil conditions, weather patterns, crop growth stages, and local practices. However, most existing solutions provide **one-time or generic advice**, which quickly becomes outdated.
 
-This project proposes an **agentic AI system** that acts as a *continuous digital agronomist*, guiding farmers with timely and adaptive decisions throughout the entire crop lifecycle — from sowing to harvest.
+This project proposes an **agentic AI system** that acts as a *continuous digital agronomist*, guiding farmers with timely and adaptive decisions throughout the entire crop lifecycle  from sowing to harvest.
 
 ---
 
@@ -34,9 +34,9 @@ To design an **autonomous AI system** that:
 
 The key idea is to treat farming as a **sequential decision-making problem**, not a single recommendation task.
 
-Instead of asking *“What should I do now?”* once, the system continuously answers:
+Instead of asking *What should I do now?* once, the system continuously answers:
 
-> **“What should be done next, given what has already happened and what is changing?”**
+> **What should be done next, given what has already happened and what is changing?**
 
 ---
 
@@ -50,35 +50,35 @@ This system is **agentic** because it:
 - **Adapts**: Updates decisions when conditions change  
 - **Acts continuously**: Supports the farmer across the full crop lifecycle  
 
-It does not wait for queries — it proactively guides.
+It does not wait for queries  it proactively guides.
 
 
-## 🔄 High-Level Agentic Workflow
+##  High-Level Agentic Workflow
 Farmer Inputs + Weather Data + Time + Local conditions
-↓
+
 Understand Current Farm Conditions
-↓
+
 Track Crop Growth & Past Actions
-↓
+
 Decide What to Do Next
-↓
+
 Give Clear Farming Advice
-↓
+
 Receive Farmer Feedback
-↓
+
 Update and Repeat Continuously
 
 
 ##  Tech Stack (Proposed)
 
 ###  AI & Decision Logic
-- **Python** – Core agent logic and reasoning  
-- **Rule-based** – Clear, explainable decisions  
+- **Python**  Core agent logic and reasoning  
+- **Rule-based**  Clear, explainable decisions  
 - **Future Scope**: Reinforcement Learning for adaptive policy optimization  
 
 
 ###  State & Memory
-- **SQLite / MongoDB** – Crop state, history, and feedback storage  
+- **SQLite / MongoDB**  Crop state, history, and feedback storage  
 
 
 

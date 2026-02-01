@@ -1,8 +1,8 @@
 """
-Integration Layer: Member 4 (Prompts) ↔ Member 3 (Environment Tools)
+Integration Layer: Prompts and Environment Tools integration.
 
-This module bridges Member 4's Pydantic data models with Member 3's
-environmental data fetching. Ensures type safety and data contract compliance.
+This module bridges Pydantic data models with environmental data fetching.
+Ensures type safety and data contract compliance.
 """
 
 from typing import Optional
@@ -12,13 +12,11 @@ from src.agents.state import WeatherData, SoilData
 
 def fetch_and_validate_environment_data(latitude: float, longitude: float) -> dict:
     """
-    Fetch environmental data from Member 3's tools and convert to Member 4's models.
-    
     This function:
-    1. Calls Member 3's get_environmental_context()
+    1. Calls environmental context fetching
     2. Extracts weather and soil data
     3. Validates against Pydantic models (WeatherData, SoilData)
-    4. Returns typed data ready for Member 4's chains
+    4. Returns typed data ready for processing chains
     
     Args:
         latitude: Location latitude
@@ -28,10 +26,10 @@ def fetch_and_validate_environment_data(latitude: float, longitude: float) -> di
         dict with keys:
             - weather_data: WeatherData model instance
             - soil_data: SoilData model instance
-            - raw_response: Original response from Member 3
+            - raw_response: Original response
     """
     try:
-        # Get environmental context from Member 3
+        # Get environmental context
         raw_env_data = get_environmental_context()
         
         # Extract weather data and validate against WeatherData model
@@ -49,7 +47,7 @@ def fetch_and_validate_environment_data(latitude: float, longitude: float) -> di
             soil_type=soil_dict.get("soil_type"),
             soil_ph=soil_dict.get("soil_ph"),
             soil_moisture=soil_dict.get("soil_moisture"),
-            nitrogen=None,  # Not provided by Member 3 yet
+            nitrogen=None,
             phosphorus=None,
             potassium=None
         )
@@ -81,14 +79,14 @@ def fetch_and_validate_environment_data(latitude: float, longitude: float) -> di
 
 def format_environment_for_prompt(weather_data: WeatherData, soil_data: SoilData) -> dict:
     """
-    Format Member 3's data into variables for Member 4's prompt templates.
+    Format data into variables for prompt templates.
     
     This function converts Pydantic models into the exact variable names
-    expected by ADVICE_GENERATION_SYSTEM_PROMPT and other prompts.
+    expected by prompt templates.
     
     Args:
-        weather_data: WeatherData model from Member 3
-        soil_data: SoilData model from Member 3
+        weather_data: WeatherData model
+        soil_data: SoilData model
         
     Returns:
         dict with keys matching prompt template variables:
@@ -101,13 +99,13 @@ def format_environment_for_prompt(weather_data: WeatherData, soil_data: SoilData
             - soil_type
     """
     return {
-        # Weather variables (from Member 3 → WeatherData)
+        # Weather variables
         "temperature_c": weather_data.temperature_c or "Unknown",
         "humidity": weather_data.humidity or "Unknown",
         "rainfall_mm": weather_data.rainfall_mm or 0,
         "weather_alert": weather_data.weather_alert or "None",
         
-        # Soil variables (from Member 3 → SoilData)
+        # Soil variables
         "soil_ph": soil_data.soil_ph or "Unknown",
         "soil_moisture": soil_data.soil_moisture or "Unknown",
         "soil_type": soil_data.soil_type or "Unknown",

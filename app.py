@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-st.set_page_config(page_title="AgriTech AI - Farmer Dashboard", layout="wide", page_icon="🌾")
+st.set_page_config(page_title="AgriTech AI - Farmer Dashboard", layout="wide")
 
 if not st.session_state.get('authenticated', False):
     st.markdown("""
@@ -20,7 +20,7 @@ if not st.session_state.get('authenticated', False):
 
 def connect_db():
     if st.session_state.get('authenticated'):
-        with st.sidebar.expander("🔌 System Health", expanded=False):
+        with st.sidebar.expander("System Health", expanded=False):
             st.write(f"**GPS:** {'GPS not enabled' if st.session_state.get('env_data', {}).get('location') else 'GPS enabled'}")
             
             import os
@@ -145,13 +145,13 @@ def welcome_page():
     analysis = st.session_state.get('ai_analysis', {})
 
     if env_data.get('location') and env_data['location'].get('latitude'):
-        st.success(f" Location identified: {env_data['location']['latitude']:.4f}, {env_data['location']['longitude']:.4f}")
+        st.success(f"Location identified: {env_data['location']['latitude']:.4f}, {env_data['location']['longitude']:.4f}")
     else:
         st.warning(" Location identified but coordinates unavailable.")
 
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader(" Weather Context")
+        st.subheader("Weather Context")
         w = env_data['weather']
         st.write(f"**Temp:** {w['temperature_c']}°C")
         st.write(f"**Humidity:** {w['humidity']}%")
@@ -161,7 +161,7 @@ def welcome_page():
             st.info("No active weather alerts.")
 
     with col2:
-        st.subheader(" Soil Composition")
+        st.subheader("Soil Composition")
         s = env_data['soil']
         st.write(f"**Type:** {s['soil_type'] or 'Unknown'}")
         st.write(f"**Est. pH:** {s['soil_ph'] or 'N/A'}")
@@ -192,7 +192,7 @@ def welcome_page():
         ph_val = s['soil_ph'] if s['soil_ph'] else 7.0
         ph_level = st.number_input("Soil pH Level", value=float(ph_val), step=0.1)
 
-        submitted = st.form_submit_button("Launch Dashboard ")
+        submitted = st.form_submit_button("Launch Dashboard")
 
         if submitted:
             st.session_state.soil_type = selected_soil
@@ -204,7 +204,7 @@ def welcome_page():
             st.rerun()
 
     with st.sidebar:
-        if st.button("🔄 Refresh Data"):
+        if st.button("Refresh Data"):
             if 'env_data' in st.session_state:
                 del st.session_state.env_data
             if 'ai_analysis' in st.session_state:

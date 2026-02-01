@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env
 
 """
-🧪 Red Team Testing for Member 4 Prompts & Chains
+ Red Team Testing for Member 4 Prompts & Chains
 Unit testing LLM prompts in isolation before graph integration.
 Tests truth-checking, safety guardrails, and input validation.
 """
@@ -40,7 +40,7 @@ def print_test_header(test_num: int, title: str):
 
 def print_result(success: bool, message: str, details: str = ""):
     """Print a test result with color coding."""
-    symbol = f"{Colors.GREEN}✓ PASS{Colors.RESET}" if success else f"{Colors.RED}✗ FAIL{Colors.RESET}"
+    symbol = f"{Colors.GREEN} PASS{Colors.RESET}" if success else f"{Colors.RED} FAIL{Colors.RESET}"
     print(f"{symbol} | {message}")
     if details:
         print(f"   Details: {details}\n")
@@ -292,7 +292,7 @@ async def test_6_extraction_consistency():
             extraction = extract_keywords_from_query_sync(query)
             results.append(extraction)
             print(f"Query: {Colors.YELLOW}\"{query}\"{Colors.RESET}")
-            print(f"  → Crop: {extraction.crop}, Pests: {extraction.pests}, Urgency: {extraction.urgency}\n")
+            print(f"   Crop: {extraction.crop}, Pests: {extraction.pests}, Urgency: {extraction.urgency}\n")
         
         # Check consistency
         crops_consistent = len(set(r.crop for r in results)) == 1
@@ -377,10 +377,10 @@ async def test_7_localization_awareness():
 async def run_all_tests():
     """Run all red team tests."""
     print(f"\n{Colors.BOLD}{Colors.BLUE}")
-    print("╔════════════════════════════════════════════════════════════════════╗")
-    print("║          🧪 MEMBER 4 RED TEAM TESTING - LLM Prompt Units           ║")
-    print("║                  Unit Testing Before Graph Integration             ║")
-    print("╚════════════════════════════════════════════════════════════════════╝")
+    print("")
+    print("           MEMBER 4 RED TEAM TESTING - LLM Prompt Units           ")
+    print("                  Unit Testing Before Graph Integration             ")
+    print("")
     print(Colors.RESET)
     
     await test_1_conflict_detection()
@@ -393,21 +393,21 @@ async def run_all_tests():
     
     # Summary
     print(f"\n{Colors.BOLD}{Colors.CYAN}{'='*70}{Colors.RESET}")
-    print(f"{Colors.BOLD}{Colors.GREEN}🎯 TESTING COMPLETE!{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.GREEN} TESTING COMPLETE!{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.CYAN}{'='*70}{Colors.RESET}")
     print(f"\n{Colors.BOLD}Summary:{Colors.RESET}")
-    print(f"  ✓ Conflict detection logic")
-    print(f"  ✓ Safety guardrails & banned substances")
-    print(f"  ✓ Input validation & gibberish filtering")
-    print(f"  ✓ Complex multi-factor scenarios")
-    print(f"  ✓ Diagnosis accuracy & context-awareness")
-    print(f"  ✓ Extraction consistency across variations")
-    print(f"  ✓ Localization & climate adaptation")
+    print(f"   Conflict detection logic")
+    print(f"   Safety guardrails & banned substances")
+    print(f"   Input validation & gibberish filtering")
+    print(f"   Complex multi-factor scenarios")
+    print(f"   Diagnosis accuracy & context-awareness")
+    print(f"   Extraction consistency across variations")
+    print(f"   Localization & climate adaptation")
     print(f"\n{Colors.BOLD}Next Steps:{Colors.RESET}")
     print(f"  1. Review any FAIL results above")
     print(f"  2. Adjust prompts in src/agents/prompts.py if needed")
     print(f"  3. Re-run tests to verify fixes")
-    print(f"  4. Once all tests pass → Ready for Member 2 graph integration\n")
+    print(f"  4. Once all tests pass  Ready for Member 2 graph integration\n")
 
 
 if __name__ == "__main__":
