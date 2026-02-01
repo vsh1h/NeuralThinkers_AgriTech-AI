@@ -28,7 +28,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-st.set_page_config(page_title="AgriTech AI - Farmer Dashboard", layout="wide")
+st.set_page_config(page_title="AgriTech AI ~ Farmer Dashboard", layout="wide")
 
 if not st.session_state.get('authenticated', False):
     st.markdown("""
