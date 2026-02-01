@@ -2,24 +2,44 @@ import streamlit as st
 import sqlite3
 import hashlib
 from streamlit_js_eval import get_geolocation
-<<<<<<< Updated upstream
-=======
 from farmer_dashboard import show_farmer_dashboard
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 st.set_page_config(page_title="AgriTech AI - Farmer Dashboard", layout="wide", page_icon="🌾")
->>>>>>> Stashed changes
 
+if not st.session_state.get('authenticated', False):
+    st.markdown("""
+        <style>
+            [data-testid="stSidebar"] {
+                display: none;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
 def connect_db():
+    if st.session_state.get('authenticated'):
+        with st.sidebar.expander("🔌 System Health", expanded=False):
+            st.write(f"**GPS:** {'✅' if st.session_state.get('env_data', {}).get('location') else '❌'}")
+            
+            import os
+            keys = {
+                "OpenWeather": bool(os.environ.get("OPENWEATHER_API_KEY")),
+                "Ambee": bool(os.environ.get("AMBEE_API_KEY")),
+                "OpenAI": bool(os.environ.get("OPENAI_API_KEY"))
+            }
+            for k, v in keys.items():
+                st.write(f"**{k}:** {'✅' if v else '❌'}")
+                
+            if st.session_state.get('env_data'):
+                st.json(st.session_state.env_data['location'])
+
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users(username TEXT, password TEXT)''')
     conn.commit()
     conn.close()
-
 
 def register_user(username, password):
     conn = sqlite3.connect('users.db')
@@ -28,7 +48,6 @@ def register_user(username, password):
     c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
     conn.commit()
     conn.close()
-
 
 def authenticate(username, password):
     conn = sqlite3.connect('users.db')
@@ -41,7 +60,6 @@ def authenticate(username, password):
     user = c.fetchone()
     conn.close()
     return True if user else False
-
 
 def register_page():
     st.title("Create Account")
@@ -67,7 +85,6 @@ def register_page():
             st.session_state.page = "login"
             st.rerun()
 
-
 def login_page():
     st.title("Login")
     username = st.text_input("Username")
@@ -87,7 +104,6 @@ def login_page():
         st.session_state.page = "register"
         st.rerun()
 
-
 @st.dialog("Location Permission Request")
 def location_alert():
     st.write(
@@ -97,7 +113,6 @@ def location_alert():
     if st.button("I understand, let's proceed"):
         st.session_state.location_allowed = True
         st.rerun()
-
 
 def welcome_page():
     if 'location_allowed' not in st.session_state:
@@ -110,78 +125,30 @@ def welcome_page():
         st.info("Please respond to the location permission request to proceed.")
         st.stop()
 
-    # Import wrapper here to avoid circular imports or early rendering issues
     from environment_data.wrapper import get_environmental_context
     from src.ai_logic import get_expert_analysis
 
-    # Check if we already have data to avoid re-fetching on every rerun
     if 'env_data' not in st.session_state:
         with st.spinner("Analyzing your field environment (Weather + Soil)..."):
             env_data = get_environmental_context()
             
-            # Simple validation: if we didn't get coordinates, we can't do much
             if not env_data['location']:
                  st.warning("Could not detect precise location. Please ensure location is enabled.")
                  st.stop()
                  
             st.session_state.env_data = env_data
             
-            # Get AI Analysis
             analysis = get_expert_analysis(env_data['weather'], env_data['soil'])
             st.session_state.ai_analysis = analysis
 
-<<<<<<< Updated upstream
-        if lat is not None and lon is not None:
-            st.success(f" Location identified: {lat}, {lon}")
-        else:
-            st.warning("Location detected, but coordinates are unavailable.")
-
-        st.divider()
-        st.subheader("Field & Crop Information")
-
-        with st.form("farmer_data_form"):
-            col1, col2 = st.columns(2)
-
-            with col1:
-                soil_type = st.selectbox(
-                    "Select Soil Type",
-                    ["Clay", "Silt", "Sandy", "Black Soil", "Loamy","Red soil"]
-                )
-                crop_type = st.selectbox(
-                    "Crop Type",
-                    ["Rice", "Wheat", "Cotton", "Sugarcane", "Maize"]
-                )
-
-            with col2:
-                ph_level = st.number_input(
-                    "Soil pH Level",
-                    min_value=0.0,
-                    max_value=14.0,
-                    value=7.0,
-                    step=0.1
-                )
-                st.caption("Standard pH for most crops is 6.0 - 7.5")
-
-            fert_used = st.toggle("Did you use fertilizer?")
-            if fert_used:
-                f_amount = st.number_input("Amount (ml per unit)", min_value=0.0)
-
-            submitted = st.form_submit_button("Get AI Recommendations")
-
-            if submitted:
-                st.info("AI Agent is analyzing your field context...")
-=======
-    # Display Data
     env_data = st.session_state.env_data
     analysis = st.session_state.get('ai_analysis', {})
->>>>>>> Stashed changes
 
     if env_data.get('location') and env_data['location'].get('latitude'):
         st.success(f" Location identified: {env_data['location']['latitude']:.4f}, {env_data['location']['longitude']:.4f}")
     else:
         st.warning(" Location identified but coordinates unavailable.")
 
-    # Weather & Soil Context Cards
     col1, col2 = st.columns(2)
     with col1:
         st.subheader(" Weather Context")
@@ -216,15 +183,12 @@ def welcome_page():
         with c1:
             selected_crop = st.selectbox("Select Crop", suggested_crops)
         with c2:
-            # Allow overriding soil type if sensor data is wrong
             detected_soil = list([s['soil_type']]) if s['soil_type'] else []
             all_soils = detected_soil + ["Clay", "Silt", "Sandy", "Black Soil", "Loamy", "Red soil"]
-            # Remove duplicates while preserving order
             all_soils = list(dict.fromkeys(all_soils))
             
             selected_soil = st.selectbox("Confirm Soil Type", all_soils)
 
-        # Allow pH override
         ph_val = s['soil_ph'] if s['soil_ph'] else 7.0
         ph_level = st.number_input("Soil pH Level", value=float(ph_val), step=0.1)
 
@@ -235,19 +199,25 @@ def welcome_page():
             st.session_state.crop_type = selected_crop
             st.session_state.ph_level = ph_level
             st.session_state.weather_alert = env_data['weather']['weather_alert']
-            
-            # Store action plan for dashboard
             st.session_state.action_plan = analysis.get('action_plan', [])
-            
             st.session_state.page = "dashboard"
+            st.rerun()
+
+    with st.sidebar:
+        if st.button("🔄 Refresh Data"):
+            if 'env_data' in st.session_state:
+                del st.session_state.env_data
+            if 'ai_analysis' in st.session_state:
+                del st.session_state.ai_analysis
             st.rerun()
 
     if st.sidebar.button("Logout"):
         st.session_state.authenticated = False
         st.session_state.page = "login"
         st.session_state.location_allowed = False
+        if 'env_data' in st.session_state:
+            del st.session_state.env_data
         st.rerun()
-
 
 def main():
     connect_db()
@@ -258,13 +228,15 @@ def main():
         st.session_state.page = "login"
 
     if st.session_state.authenticated:
-        welcome_page()
+        if st.session_state.page == "dashboard":
+            show_farmer_dashboard()
+        else:
+            welcome_page()
     else:
         if st.session_state.page == "login":
             login_page()
         elif st.session_state.page == "register":
             register_page()
-
 
 if __name__ == "__main__":
     main()
