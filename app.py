@@ -2,9 +2,6 @@ import streamlit as st
 import sqlite3
 import hashlib
 from streamlit_js_eval import get_geolocation
-from farmer_dashboard import show_farmer_dashboard
-
-st.set_page_config(page_title="AgriTech AI - Farmer Dashboard", layout="wide", page_icon="🌾")
 
 
 def connect_db():
@@ -153,11 +150,7 @@ def welcome_page():
             submitted = st.form_submit_button("Get AI Recommendations")
 
             if submitted:
-                st.session_state.soil_type = soil_type
-                st.session_state.crop_type = crop_type
-                st.session_state.ph_level = ph_level
-                st.session_state.page = "dashboard"
-                st.rerun()
+                st.info("AI Agent is analyzing your field context...")
 
     else:
         st.warning(
@@ -181,10 +174,7 @@ def main():
         st.session_state.page = "login"
 
     if st.session_state.authenticated:
-        if st.session_state.page == "dashboard":
-            show_farmer_dashboard()
-        else:
-            welcome_page()
+        welcome_page()
     else:
         if st.session_state.page == "login":
             login_page()

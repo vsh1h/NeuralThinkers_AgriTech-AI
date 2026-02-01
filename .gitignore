@@ -6,6 +6,3 @@ __pycache__/
 .DS_Store
 venv/
 
-users.db
-*.db
-*.sqlite
