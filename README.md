@@ -1,89 +1,99 @@
 #  AI-Driven Decision Support Across the Crop Lifecycle
 
+##  Hosted Application
+
+ **Live URL:**  
+https://neuralthinkersagritech-ai-izdhjypdnncbq495eygprt.streamlit.app/
+
 ## Project Overview
 
-Farming decisions are not static. They continuously change based on soil conditions, weather patterns, crop growth stages, and local practices. However, most existing solutions provide **one-time or generic advice**, which quickly becomes outdated.
+Farming decisions are **dynamic**, not one-time. Soil conditions evolve, weather changes unpredictably, and crop requirements vary at each growth stage. Most existing agricultural advisory systems provide **static or generic recommendations**, which quickly become outdated.
 
-This project proposes an **agentic AI system** that acts as a *continuous digital agronomist*, guiding farmers with timely and adaptive decisions throughout the entire crop lifecycle  from sowing to harvest.
+This project introduces an **agentic AI system** that acts as a **continuous digital agronomist**, guiding farmers with timely, adaptive, and context-aware decisions throughout the entire crop lifecycle — from **sowing to harvest**.
 
 ---
 
 ##  Problem Statement
 
-Farmers find it difficult to make the right crop decisions because:
+Farmers struggle to make optimal decisions because:
+
 - Soil conditions change over time  
 - Weather is unpredictable  
-- Crop needs vary at each growth stage  
-- Advice is often delayed or generic  
+- Crop needs vary by growth stage  
+- Advisory systems are delayed or generic  
 
-As a result, farmers rely on one-time recommendations that do not adapt to evolving conditions.
+As a result, farmers rely on **one-time recommendations** that fail to adapt to real-world changes.
 
 ---
 
-##  Goal of the Project
+##  Project Goal
 
-To design an **autonomous AI system** that:
+To design an **autonomous AI-driven decision support system** that:
+
 - Continuously observes farm conditions  
-- Tracks crop progression over time  
-- Dynamically decides the *next best farming action*  
-- Updates guidance whenever conditions change  
+- Tracks crop progression and past actions  
+- Determines the **next best farming action**  
+- Updates guidance dynamically as conditions evolve  
 
 ---
 
 ##  Core Idea
 
-The key idea is to treat farming as a **sequential decision-making problem**, not a single recommendation task.
+Farming is treated as a **sequential decision-making problem**, not a single recommendation task.
 
-Instead of asking *What should I do now?* once, the system continuously answers:
+Instead of asking:
 
-> **What should be done next, given what has already happened and what is changing?**
+> *“What should I do now?”*
+
+The system continuously answers:
+
+> **“What should be done next, given what has already happened and what is changing?”**
 
 ---
 
-##  Why an Agentic AI?
+##  Why Agentic AI?
 
 This system is **agentic** because it:
 
-- **Observes**: Farmer inputs, weather data, time, and crop stage, etc.
+- **Observes**: Farmer inputs, weather data, time, crop stage, and local conditions  
 - **Remembers**: Past actions and current crop state  
-- **Decides autonomously**: Determines the next best action  
+- **Decides autonomously**: Determines the next best farming action  
 - **Adapts**: Updates decisions when conditions change  
-- **Acts continuously**: Supports the farmer across the full crop lifecycle  
+- **Acts continuously**: Provides proactive guidance throughout the crop lifecycle  
 
-It does not wait for queries  it proactively guides.
+It does **not wait for user queries** — it actively supports decision-making.
 
+---
 
 ##  High-Level Agentic Workflow
-Farmer Inputs + Weather Data + Time + Local conditions
 
-Understand Current Farm Conditions
+1. Collect farmer inputs, weather data, time, and local conditions  
+2. Understand current farm and soil conditions  
+3. Track crop growth stage and historical actions  
+4. Decide the next best farming action  
+5. Provide clear and actionable advice  
+6. Receive farmer feedback  
+7. Update internal state and repeat continuously  
 
-Track Crop Growth & Past Actions
+---
 
-Decide What to Do Next
+##  Tech Stack
 
-Give Clear Farming Advice
+### AI & Decision Logic
+- **Python** – Core agent logic and orchestration  
+- **Rule-based System** – Transparent and explainable decision-making  
+- **Future Scope** – Reinforcement Learning for adaptive policy optimization  
 
-Receive Farmer Feedback
-
-Update and Repeat Continuously
-
-
-##  Tech Stack (Proposed)
-
-###  AI & Decision Logic
-- **Python**  Core agent logic and reasoning  
-- **Rule-based**  Clear, explainable decisions  
-- **Future Scope**: Reinforcement Learning for adaptive policy optimization  
-
+ 
+###  Data Validation & Schemas
+- **Pydantic** – Strong data validation, structured inputs, and reliable state management  
 
 ###  State & Memory
-- **SQLite / MongoDB**  Crop state, history, and feedback storage  
+- **SQLite** – Lightweight relational storage for crop state, action history, and feedback  
 
 
+###  Frontend & Deployment
+- **Streamlit** – Interactive web UI for farmer interaction and real-time recommendations  
 
-
-
-
-
+---
 

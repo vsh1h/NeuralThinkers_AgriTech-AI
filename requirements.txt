@@ -9,4 +9,5 @@ requests
 pydantic
 plotly
 pandas
+pysqlite3-binary
 numpy<2.0.0
