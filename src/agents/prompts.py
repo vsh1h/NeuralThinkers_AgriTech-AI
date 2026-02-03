@@ -181,6 +181,10 @@ ADVICE_GENERATION_SYSTEM_PROMPT = """
 === SENIOR AGRONOMIST PERSONA ===
 You are a Senior Agronomist. Provide practical, low-cost, and science-backed solutions.
 
+=== LANGUAGE PROTOCOL ===
+Identify the language of the farmer's question and respond ENTIRELY in that same language. 
+This is critical for the farmer's understanding. If the question is in Hindi, respond in Hindi. If in Spanish, respond in Spanish, etc.
+
 === CONTEXTUAL DATA ===
 - Soil Data: pH {soil_ph}, Moisture {soil_moisture}%
 - Weather: {temperature_c}C, Alert: {weather_alert}
@@ -191,7 +195,7 @@ You are a Senior Agronomist. Provide practical, low-cost, and science-backed sol
 
 
 === TRUTH-CHECKING PROTOCOL ===
-If farmer claims conflict with environmental data, respond with GENTLE VERIFICATION.
+If farmer claims conflict with environmental data, respond with GENTLE VERIFICATION in their language.
 Example: "Your data shows 85% moisture, but since you observed dryness, we will proceed with a cautious irrigation plan."
 
 === CORE PRINCIPLE ===
@@ -244,7 +248,7 @@ Data: Rain alert shows 100mm expected
 Response: {{"has_conflict": true, ..., "proceed_with_advice": false}}
 """
 
-def create_extraction_chain(model_name: str = "gemini-3-flash-preview"):
+def create_extraction_chain(model_name: str = "gemini-flash-latest"):
     """Chain for keyword extraction using Gemini (free quota)."""
     llm = ChatGoogleGenerativeAI(
         model=model_name,
@@ -258,7 +262,7 @@ def create_extraction_chain(model_name: str = "gemini-3-flash-preview"):
     return prompt | llm
 
 
-def create_validation_chain(model_name: str = "gemini-3-flash-preview"):
+def create_validation_chain(model_name: str = "gemini-flash-latest"):
     """Validates input using Gemini (free quota). Binds to ValidationResult for workflow branching."""
     llm = ChatGoogleGenerativeAI(
         model=model_name,
@@ -271,7 +275,7 @@ def create_validation_chain(model_name: str = "gemini-3-flash-preview"):
     return prompt | llm
 
 
-def create_vision_chain(model_name: str = "gemini-3-flash-preview"):
+def create_vision_chain(model_name: str = "gemini-flash-latest"):
     """Member 4's Photo Model. Resolves Farmer vs API conflicts."""
     llm = ChatGoogleGenerativeAI(
         model=model_name,
@@ -282,7 +286,7 @@ def create_vision_chain(model_name: str = "gemini-3-flash-preview"):
     return prompt | llm
 
 
-def create_advice_chain(model_name: str = "gemini-3-flash-preview"):
+def create_advice_chain(model_name: str = "gemini-flash-latest"):
     """Main Advisory Engine using Gemini for high-level reasoning."""
     llm = ChatGoogleGenerativeAI(
         model=model_name,
@@ -293,7 +297,7 @@ def create_advice_chain(model_name: str = "gemini-3-flash-preview"):
     return prompt | llm
 
 
-def create_truth_check_chain(model_name: str = "gpt-4o-mini"):
+def create_truth_check_chain(model_name: str = "gemini-flash-latest"):
     """
     Dedicated chain for comparing farmer claims against environmental data.
     Detects discrepancies and suggests gentle verification before advice.
@@ -312,12 +316,12 @@ def create_truth_check_chain(model_name: str = "gpt-4o-mini"):
     return prompt | llm
 
 @retry_on_rate_limit(max_retries=3)
-def extract_keywords_from_query_sync(query: str, model_name: str = "gemini-3-flash-preview") -> ExtractionModel:
+def extract_keywords_from_query_sync(query: str, model_name: str = "gemini-flash-latest") -> ExtractionModel:
     """
     Extract structured keywords from a farmer's natural language query.
     Args:
         query: The farmer's input text
-        model_name: Gemini model to use (default: gemini-3-flash-preview)   
+        model_name: Gemini model to use (default: gemini-flash-latest)   
     Returns:
         ExtractionModel with extracted entities
     """
@@ -327,12 +331,12 @@ def extract_keywords_from_query_sync(query: str, model_name: str = "gemini-3-fla
 
 
 @retry_on_rate_limit(max_retries=3)
-async def extract_keywords_from_query(query: str, model_name: str = "gemini-3-flash-preview") -> ExtractionModel:
+async def extract_keywords_from_query(query: str, model_name: str = "gemini-flash-latest") -> ExtractionModel:
     """
     Async version: Extract structured keywords from a farmer's natural language query.
     Args:
         query: The farmer's input text
-        model_name: Gemini model to use (default: gemini-3-flash-preview)
+        model_name: Gemini model to use (default: gemini-flash-latest)
     Returns:
         ExtractionModel with extracted entities
     """
@@ -367,7 +371,7 @@ def generate_agricultural_advice(
     temperature_c: float,
     weather_alert: str = None,
     history: str = "No previous history.",
-    model_name: str = "gemini-3-flash-preview"
+    model_name: str = "gemini-flash-latest"
 ) -> str:
     """
     Generate agricultural advice grounded in environmental context.
@@ -430,7 +434,7 @@ def verify_farmer_claim(
     rainfall_mm: float,
     temperature_c: float,
     weather_alert: str = None,
-    model_name: str = "gemini-3-flash-preview"
+    model_name: str = "gemini-flash-latest"
 ) -> dict:
     """
     Verify farmer's claim against environmental data before advice.
@@ -531,7 +535,7 @@ def generate_advice_with_environment(
     latitude: float,
     longitude: float,
     history: str = "No previous history.",
-    model_name: str = "gemini-3-flash-preview"
+    model_name: str = "gemini-flash-latest"
 ) -> str:
     """
     Generate agricultural advice by automatically fetching environmental data 
@@ -545,7 +549,7 @@ def generate_advice_with_environment(
         latitude: GPS latitude for location
         longitude: GPS longitude for location
         history: Historical context from Member 5 (optional)
-        model_name: Gemini model (default: gemini-3-flash-preview)
+        model_name: Gemini model (default: gemini-flash-latest)
         
     Returns:
         str: Detailed agricultural advice

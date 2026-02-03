@@ -19,7 +19,7 @@ def get_llm(temperature=0.3):
     if os.environ.get("OPENAI_API_KEY"):
         return ChatOpenAI(model="gpt-4o-mini", temperature=temperature)
     elif os.environ.get("GEMINI_API_KEY"):
-        return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=temperature)
+        return ChatGoogleGenerativeAI(model="gemini-flash-latest", temperature=temperature)
     return None
 
 def validate_input_node(state: AgentState) -> AgentState:
