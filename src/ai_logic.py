@@ -175,7 +175,7 @@ def get_expert_analysis(weather_data: Dict[str, Any], soil_data: Dict[str, Any])
 def get_chat_response(messages: List[Dict[str, str]], context: Dict[str, Any]) -> str:
     """
     Get chat response using the advanced logic from src.agents.prompts.
-    Priority: OpenAI → Gemini → Smart Simulator
+    Priority: Gemini → OpenAI → Smart Simulator
     """
     api_key = os.environ.get("OPENAI_API_KEY", "").strip().strip('"').strip("'")
     gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
@@ -185,8 +185,8 @@ def get_chat_response(messages: List[Dict[str, str]], context: Dict[str, Any]) -
     print(f"\n{'='*60}")
     print(f"AI ADVISOR DEBUG:")
     print(f"  AI_AVAILABLE: {AI_AVAILABLE}")
-    print(f"  OpenAI Key Present: {bool(api_key and 'sk-' in api_key)}")
     print(f"  Gemini Key Present: {bool(gemini_key)}")
+    print(f"  OpenAI Key Present: {bool(api_key and 'sk-' in api_key)}")
     print(f"  User Query: {user_prompt[:50]}...")
     print(f"{'='*60}\n")
     
@@ -195,7 +195,31 @@ def get_chat_response(messages: List[Dict[str, str]], context: Dict[str, Any]) -
     if len(messages) > 1:
         history = "\n".join([f"{m['role']}: {m['content']}" for m in messages[:-1]])
     
-    # Try OpenAI first (more generous rate limits)
+    # Try Gemini FIRST
+    if AI_AVAILABLE and gemini_key:
+        try:
+            print("  → Trying Gemini Flash...")
+            advice = generate_agricultural_advice(
+                farmer_query=user_prompt,
+                soil_ph=context.get('ph_level', 7.0),
+                soil_moisture=context.get('soil_moisture', 50.0),
+                rainfall_mm=context.get('rainfall_mm', 0.0),
+                temperature_c=context.get('temperature_c', 25.0),
+                weather_alert=context.get('weather_alert', 'None'),
+                history=history,
+                model_name="gemini-flash-latest" 
+            )
+            print(f"  ✓ Gemini Response received ({len(advice)} chars)")
+            return advice
+        except Exception as e:
+            error_msg = str(e)
+            if "RESOURCE_EXHAUSTED" in error_msg or "429" in error_msg:
+                print(f"  ✗ Gemini rate limit hit (Quota full)")
+            else:
+                print(f"  ✗ Gemini FAILED: {error_msg[:100]}")
+            print(f"  → Falling back to OpenAI...")
+
+    # Try OpenAI as fallback
     if AI_AVAILABLE and api_key and "sk-" in api_key:
         try:
             print("  → Trying OpenAI GPT-4o-mini...")
@@ -210,6 +234,9 @@ def get_chat_response(messages: List[Dict[str, str]], context: Dict[str, Any]) -
             )
             
             prompt_template = """You are a Senior Agronomist providing expert agricultural advice.
+
+=== LANGUAGE PROTOCOL ===
+Identify the language of the farmer's question and respond ENTIRELY in that same language. 
 
 FARMER'S QUESTION: {query}
 
@@ -242,33 +269,7 @@ Provide practical, science-backed advice. Be specific and actionable."""
             
         except Exception as e:
             print(f"  ✗ OpenAI FAILED: {str(e)[:100]}")
-            print(f"  → Trying Gemini as fallback...")
-    
-    # Try Gemini as fallback
-    if AI_AVAILABLE and gemini_key:
-        try:
-            advice = generate_agricultural_advice(
-                farmer_query=user_prompt,
-                soil_ph=context.get('ph_level', 7.0),
-                soil_moisture=context.get('soil_moisture', 50.0),
-                rainfall_mm=context.get('rainfall_mm', 0.0),
-                temperature_c=context.get('temperature_c', 25.0),
-                weather_alert=context.get('weather_alert', 'None'),
-                history=history,
-                model_name="gemini-1.5-flash-latest"  # Correct model name for free tier
-            )
-            print(f"  ✓ Gemini Response received ({len(advice)} chars)")
-            return advice
-        except Exception as e:
-            error_msg = str(e)
-            if "RESOURCE_EXHAUSTED" in error_msg or "429" in error_msg:
-                print(f"  ✗ Gemini rate limit hit (20/day limit)")
-                print(f"  → Quota resets in 24 hours")
-            else:
-                print(f"  ✗ Gemini FAILED: {error_msg[:100]}")
             print(f"  → Falling back to Smart Simulator")
-    else:
-        print("  → Using Smart Simulator (No API keys found)")
     
     return get_simulated_chat(user_prompt, context)
 

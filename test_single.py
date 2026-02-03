@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quick smoke test for Member 4 chains with gemini-3-flash-preview"""
+"""Quick smoke test for Member 4 chains with gemini-flash-latest"""
 
 import os
 from dotenv import load_dotenv
@@ -8,7 +8,7 @@ load_dotenv()
 from src.agents.prompts import extract_keywords_from_query_sync
 from src.agents.state import FarmerInput, ExtractionModel
 
-print(" Testing extract_keywords_from_query_sync with gemini-3-flash-preview...")
+print(" Testing extract_keywords_from_query_sync with gemini-flash-latest...")
 
 try:
     # Test 1: Simple extraction
